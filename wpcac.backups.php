@@ -146,7 +146,11 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
 
 			}
 
-			return str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $backup );
+            $trimcontent = strstr($backup, 'wp-content');
+			$baseurl = str_replace("wp-content", "", WP_CONTENT_URL);
+			return $baseurl . $trimcontent;
+
+			//return str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $backup );
 
 		}
 
