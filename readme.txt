@@ -5,11 +5,11 @@ Requires at least: 2.9
 Tested up to: 3.5
 Stable tag: 1.0
 
-WP Command and Control is a web service that enables you to easily manage all of your WordPress powered sites from one place.
+WP Command and Control is a web service that enables you to easily manage all of your WordPress powered sites from one place. 
 
 == Description ==
 
-The WP Command and Control WordPress Plugin works with [WP Command and Control](https://wpcommandcontrol.com/) to enable you to remotely manage all your WordPress sites.
+The WP Command and Control WordPress Plugin works with [WP Command and Control](http://www.wpcommandcontrol.com/) to enable you to remotely manage all your WordPress sites. WP Command and Control is currently in private beta, please visit [WP Command and Control](http://www.wpcommandcontrol.com/) to join the annoucement list.
 
 = Features =
 
@@ -17,6 +17,9 @@ The WP Command and Control WordPress Plugin works with [WP Command and Control](
 * Track the WordPress version each site is running and easily update.
 * Track all your plugins and themes and 1 click update them.
 * Back up your database and files.
+* Schedule automated off-site backups
+* Schedule automated plugin updates
+* Generate plugin and core update reports for each of your sites
 
 = Support =
 
