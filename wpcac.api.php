@@ -35,93 +35,69 @@ foreach( $actions as $action => $value ) {
 
 		// TODO should be dynamic
 		case 'get_plugin_version' :
-
-			$actions[$action] = '1.05';
-
+			$actions[$action] = '1.06';
 		break;
 
 		case 'get_filesystem_method' :
-
 			$actions[$action] = get_filesystem_method();
-
 		break;
 
 		case 'get_supported_filesystem_methods' :
-
 			$actions[$action] = array();
-
 			if ( extension_loaded( 'ftp' ) || extension_loaded( 'sockets' ) || function_exists( 'fsockopen' ) )
 				$actions[$action][] = 'ftp';
-
 			if ( extension_loaded( 'ftp' ) )
 				$actions[$action][] = 'ftps';
-
 			if ( extension_loaded( 'ssh2' ) && function_exists( 'stream_get_contents' ) )
 				$actions[$action][] = 'ssh';
-
 		break;
 
 		case 'get_wp_version' :
-
 			global $wp_version;
-
-			$actions[$action] = (string) $wp_version;
-
+			$actions[$action] = get_bloginfo('version');
 		break;
 
 		case 'upgrade_core' :
-
 			$actions[$action] = _wpcac_upgrade_core();
-
 		break;
 
 		case 'get_plugins' :
-
 			$actions[$action] = _wpcac_supports_plugin_upgrade() ? _wpcac_get_plugins() : 'not-implemented';
-
 		break;
 
 		case 'upgrade_plugin' :
-
 			$actions[$action] = _wpcac_upgrade_plugin( (string) sanitize_text_field( $_GET['plugin'] ) );
-
 		break;
 
 		case 'activate_plugin' :
-
 			$actions[$action] = _wpcac_activate_plugin( (string) sanitize_text_field( $_GET['plugin'] ) );
-
 		break;
 		
 		case 'deactivate_plugin' :
-
 			$actions[$action] = _wpcac_deactivate_plugin( (string) sanitize_text_field( $_GET['plugin'] ) );
-
 		break;
 
 		case 'get_themes' :
-
 			$actions[$action] = _wpcac_supports_theme_upgrade() ? _wpcac_get_themes() : 'not-implemented';
-
 		break;
 
 		case 'upgrade_theme' :
-
 			$actions[$action] = _wpcac_upgrade_theme( (string) sanitize_text_field( $_GET['theme'] ) );
-
 		break;
-
-		case 'do_backup' :
+        
+        case 'get_files' :
+			$actions[$action] = _wpcac_get_files();
+		break;
+        
+        case 'do_backup' :
 		case 'do_sql_backup' :
 		case 'delete_backup' :
 		case 'supports_backups' :
 		case 'get_backup' :
 			$actions[$action] = _wpcac_backups_api_call( $action );
-
 		break;
 
 		case 'get_site_info' :
-
 			$actions[$action] = array(
 				'site_url'	=> get_site_url(),
 				'home_url'	=> get_home_url(),
@@ -129,20 +105,14 @@ foreach( $actions as $action => $value ) {
 				'backups'	=> _wpcac_get_backups_info()
 			);
 
-        break;
-
         case 'get_option_value' :
-
             $actions[$action] = array(
                 sanitize_text_field( $_GET['option_name']) => get_option((string) sanitize_text_field( $_GET['option_name'] ))
             );
-
 		break;
 
 		default :
-
 			$actions[$action] = 'not-implemented';
-
 		break;
 
 	}
