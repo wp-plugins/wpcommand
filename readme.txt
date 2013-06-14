@@ -1,25 +1,24 @@
-=== The WP Command and Control WordPress Plugin ===
-Contributors: supersoju, humanmade, joehoyle, mattheu, tcrsavage, willmot
-Tags: wpcommand, wpcontrol, wpremote, remote administration, multiple wordpress
+=== WP Command and Control Plugin ===
+Contributors: supersoju
+Tags: wpcommand, wpcontrol, remote administration, multiple wordpress
 Requires at least: 2.9
-Tested up to: 3.5
-Stable tag: 1.0
+Tested up to: 3.5.1
+Stable tag: 1.05
 
-WP Command and Control is a web service that enables you to easily manage all of your WordPress powered sites from one place. 
+WP Command and Control allows you to manage multiple WordPress installs from a single dashboard. 
 
 == Description ==
 
-The WP Command and Control WordPress Plugin works with [WP Command and Control](http://www.wpcommandcontrol.com/) to enable you to remotely manage all your WordPress sites. WP Command and Control is currently in private beta, please visit [WP Command and Control](http://www.wpcommandcontrol.com/) to join the annoucement list.
+The WP Command and Control WordPress Plugin works with [WP Command and Control](http://www.wpcommandcontrol.com/) to remotely manage all your WordPress sites. WP Command and Control is currently in private beta, please visit [WP Command and Control](http://www.wpcommandcontrol.com/) to join the annoucement list.
 
 = Features =
 
-* Track all your WordPress sites from one place.
-* Track the WordPress version each site is running and easily update.
-* Track all your plugins and themes and 1 click update them.
-* Back up your database and files.
+* Track each of your WordPress installs version and plugin info.
+* Manually or automatically update any or all of your WordPress core installs or plugins.
 * Schedule automated off-site backups
 * Schedule automated plugin updates
 * Generate plugin and core update reports for each of your sites
+* Automatically add a new WordPress site to your WP Command and Control account just by activting the plugin
 
 = Support =
 
@@ -35,4 +34,4 @@ You can email us at support@wpcommandcontrol.com for support.
 
 #### 1.0
 
-* Initial version forked from wpremote
+* Initial version
