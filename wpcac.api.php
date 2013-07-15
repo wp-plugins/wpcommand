@@ -35,7 +35,7 @@ foreach( $actions as $action => $value ) {
 
 		// TODO should be dynamic
 		case 'get_plugin_version' :
-			$actions[$action] = '1.06';
+			$actions[$action] = '1.07';
 		break;
 
 		case 'get_filesystem_method' :
@@ -102,9 +102,11 @@ foreach( $actions as $action => $value ) {
 				'site_url'	=> get_site_url(),
 				'home_url'	=> get_home_url(),
 				'admin_url'	=> get_admin_url(),
+				'site_title' => get_bloginfo('name'),
 				'backups'	=> _wpcac_get_backups_info()
 			);
-
+		break;
+		
         case 'get_option_value' :
             $actions[$action] = array(
                 sanitize_text_field( $_GET['option_name']) => get_option((string) sanitize_text_field( $_GET['option_name'] ))
