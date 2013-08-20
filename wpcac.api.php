@@ -103,8 +103,10 @@ foreach( $actions as $action => $value ) {
 				'home_url'	=> get_home_url(),
 				'admin_url'	=> get_admin_url(),
 				'site_title' => get_bloginfo('name'),
-				'backups'	=> _wpcac_get_backups_info()
-			);
+                'abspath' => WPCAC_HM_Backup::get_home_path(),
+                'backups'	=> _wpcac_get_backups_info()
+                
+            );
 		break;
 		
         case 'get_option_value' :
