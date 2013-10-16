@@ -186,7 +186,7 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
 
         /**
          * Get the estimated size of the sites files and database
-         * 
+         *
          * If the size hasn't been calculated yet then it fires an API request
          * to calculate the size and returns string 'Calculating'
          *
@@ -276,7 +276,7 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
 
                 break;
 
-            case 'hmbkp_warning' : 
+            case 'hmbkp_warning' :
 
                 if ( $this->get_warnings() ) {
 

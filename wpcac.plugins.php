@@ -7,60 +7,60 @@
  */
 function _wpcac_get_plugins() {
 
-	require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+    require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-	_wpcac_add_non_extend_plugin_support_filter();
+    _wpcac_add_non_extend_plugin_support_filter();
 
-	// Get all plugins
-	$plugins = get_plugins();
+    // Get all plugins
+    $plugins = get_plugins();
 
-	// Get the list of active plugins
-	$active  = get_option( 'active_plugins', array() );
+    // Get the list of active plugins
+    $active  = get_option( 'active_plugins', array() );
 
-	// Delete the transient so wp_update_plugins can get fresh data
-	if ( function_exists( 'get_site_transient' ) )
-		delete_site_transient( 'update_plugins' );
+    // Delete the transient so wp_update_plugins can get fresh data
+    if ( function_exists( 'get_site_transient' ) )
+        delete_site_transient( 'update_plugins' );
 
-	else
-		delete_transient( 'update_plugins' );
+    else
+        delete_transient( 'update_plugins' );
 
-	// Force a plugin update check
-	wp_update_plugins();
+    // Force a plugin update check
+    wp_update_plugins();
 
-	// Different versions of wp store the updates in different places
-	// TODO can we depreciate
-	if( function_exists( 'get_site_transient' ) && $transient = get_site_transient( 'update_plugins' ) )
-		$current = $transient;
+    // Different versions of wp store the updates in different places
+    // TODO can we depreciate
+    if( function_exists( 'get_site_transient' ) && $transient = get_site_transient( 'update_plugins' ) )
+        $current = $transient;
 
-	elseif( $transient = get_transient( 'update_plugins' ) )
-		$current = $transient;
+    elseif( $transient = get_transient( 'update_plugins' ) )
+        $current = $transient;
 
-	else
-		$current = get_option( 'update_plugins' );
+    else
+        $current = get_option( 'update_plugins' );
 
-	foreach ( (array) $plugins as $plugin_file => $plugin ) {
+    foreach ( (array) $plugins as $plugin_file => $plugin ) {
 
-		$new_version = isset( $current->response[$plugin_file] ) ? $current->response[$plugin_file]->new_version : null;
+        $new_version = isset( $current->response[$plugin_file] ) ? $current->response[$plugin_file]->new_version : null;
 
-	    if ( is_plugin_active( $plugin_file ) )
-	    	$plugins[$plugin_file]['active'] = true;
+        if ( is_plugin_active( $plugin_file ) )
+            $plugins[$plugin_file]['active'] = true;
 
-	    else
-	    	$plugins[$plugin_file]['active'] = false;
+        else
+            $plugins[$plugin_file]['active'] = false;
 
-	    if ( $new_version ) {
-	    	$plugins[$plugin_file]['latest_version'] = $new_version;
-	    	$plugins[$plugin_file]['latest_package'] = $current->response[$plugin_file]->package;
-	    	$plugins[$plugin_file]['slug'] = $current->response[$plugin_file]->slug;
+        if ( $new_version ) {
+            $plugins[$plugin_file]['latest_version'] = $new_version;
+            $plugins[$plugin_file]['latest_package'] = $current->response[$plugin_file]->package;
+            $plugins[$plugin_file]['slug'] = $current->response[$plugin_file]->slug;
 
-	    } else {
-	    	$plugins[$plugin_file]['latest_version'] = $plugin['Version'];
+        } else {
+            $plugins[$plugin_file]['latest_version'] = $plugin['Version'];
 
-	    }
+        }
 
-	}
+    }
 
-	return $plugins;
+    return $plugins;
 }
 
 /**
@@ -72,100 +72,177 @@ function _wpcac_get_plugins() {
  */
 function _wpcac_upgrade_plugin( $plugin ) {
 
-	include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
+    include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
 
-	if ( ! _wpcac_supports_plugin_upgrade() )
-		return array( 'status' => 'error', 'error' => 'WordPress version too old for plugin upgrades' );
+    if ( ! _wpcac_supports_plugin_upgrade() )
+        return array( 'status' => 'error', 'error' => 'WordPress version too old for plugin upgrades' );
 
-	_wpcac_add_non_extend_plugin_support_filter();
+    _wpcac_add_non_extend_plugin_support_filter();
 
-	// check for filesystem access
-	if ( ! _wpcac_check_filesystem_access() )
-		return array( 'status' => 'error', 'error' => 'The filesystem is not writable with the supplied credentials' );
+    // check for filesystem access
+    if ( ! _wpcac_check_filesystem_access() )
+        return array( 'status' => 'error', 'error' => 'The filesystem is not writable with the supplied credentials' );
 
-	$skin = new WPCAC_Plugin_Upgrader_Skin();
-	$upgrader = new Plugin_Upgrader( $skin );
-	$is_active = is_plugin_active( $plugin );
+    $skin = new WPCAC_Plugin_Upgrader_Skin();
+    $upgrader = new Plugin_Upgrader( $skin );
+    $is_active = is_plugin_active( $plugin );
 
-	// Force a plugin update check
-	wp_update_plugins();
+    // Force a plugin update check
+    wp_update_plugins();
 
-	// Do the upgrade
-	ob_start();
-	$result = $upgrader->upgrade( $plugin );
-	$data = ob_get_contents();
-	ob_clean();
+    // Do the upgrade
+    ob_start();
+    $result = $upgrader->upgrade( $plugin );
+    $data = ob_get_contents();
+    ob_clean();
 
-	if ( ( ! $result && ! is_null( $result ) ) || $data )
-		return array( 'status' => 'error', 'error' => 'file_permissions_error' );
+    if ( ( ! $result && ! is_null( $result ) ) || $data )
+        return array( 'status' => 'error', 'error' => 'file_permissions_error' );
 
-	elseif ( is_wp_error( $result ) )
-		return array( 'status' => 'error', 'error' => $result->get_error_code() );
+    elseif ( is_wp_error( $result ) )
+        return array( 'status' => 'error', 'error' => $result->get_error_code() );
 
-	if ( $skin->error )
-		return array( 'status' => 'error', 'error' => $skin->error );
+    if ( $skin->error )
+        return array( 'status' => 'error', 'error' => $skin->error );
 
-	// If the plugin was activited, we have to re-activate it
-	if ( $is_active ) {
+    // If the plugin was activited, we have to re-activate it
+    if ( $is_active ) {
 
-		// we can not use the "normal" way or lazy activating, as that requires wpcommand to be activated
-		if ( strpos( $plugin, 'wpcommand' ) !== false ) {
-			activate_plugin( $plugin, '', false, true );
-			return array( 'status' => 'success' );
-		}
-
-
-		// we do a remote request to activate, as we don't want to kill any installs
-		$url = add_query_arg( 'wpcac_api_key', $_GET['wpcac_api_key'], get_bloginfo( 'url' ) );
-		$url = add_query_arg( 'actions', 'activate_plugin', $url );
-		$url = add_query_arg( 'plugin', $plugin, $url );
-
-		$request = wp_remote_get( $url );
-
-		if ( is_wp_error( $request ) ) {
-			return array( 'status' => 'error', 'error' => $request->get_error_code() );
-		}
-
-		$body = wp_remote_retrieve_body( $request );
+        // we can not use the "normal" way or lazy activating, as that requires wpcommand to be activated
+        if ( strpos( $plugin, 'wpcommand' ) !== false ) {
+            activate_plugin( $plugin, '', false, true );
+            return array( 'status' => 'success' );
+        }
 
 
-		if ( ! $json = @json_decode( $body ) )
-			return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate.' );
+        // we do a remote request to activate, as we don't want to kill any installs
+        $url = add_query_arg( 'wpcac_api_key', $_GET['wpcac_api_key'], get_bloginfo( 'url' ) );
+        $url = add_query_arg( 'actions', 'activate_plugin', $url );
+        $url = add_query_arg( 'plugin', $plugin, $url );
 
-		$json = $json->activate_plugin;
+        $request = wp_remote_get( $url );
 
-		if ( empty( $json->status ) )
-			return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate. The activation request returned no response' );
+        if ( is_wp_error( $request ) ) {
+            return array( 'status' => 'error', 'error' => $request->get_error_code() );
+        }
 
-		if ( $json->status != 'success' )
-			return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate. The activation request returned response: ' . $json->status );
-	}
+        $body = wp_remote_retrieve_body( $request );
 
-	return array( 'status' => 'success' );
+
+        if ( ! $json = @json_decode( $body ) )
+            return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate.' );
+
+        $json = $json->activate_plugin;
+
+        if ( empty( $json->status ) )
+            return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate. The activation request returned no response' );
+
+        if ( $json->status != 'success' )
+            return array( 'status' => 'error', 'error' => 'The plugin was updated, but failed to re-activate. The activation request returned response: ' . $json->status );
+    }
+
+    return array( 'status' => 'success' );
 }
 
 function _wpcac_activate_plugin( $plugin ) {
 
-	include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$result = activate_plugin( $plugin );
+    $result = activate_plugin( $plugin );
 
-	if ( is_wp_error( $result ) )
-		return array( 'status' => 'error', 'error' => $result->get_error_code() );
+    if ( is_wp_error( $result ) )
+        return array( 'status' => 'error', 'error' => $result->get_error_code() );
 
-	return array( 'status' => 'success' );
+    return array( 'status' => 'success' );
+}
+
+function _wpcac_install_plugin( $plugin, $args = array() ) {
+
+    include_once ABSPATH . 'wp-admin/includes/admin.php';
+    include_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    include_once ABSPATH . 'wp-includes/update.php';
+
+    // Access the plugins_api() helper function
+    include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+    $api_args = array(
+        //'slug' => $plugin,
+        'slug' => 'jetpack',
+        //'fields' => array( 'sections' => false )
+    );
+    //$api = plugins_api( 'plugin_information', array( 'slug' => 'custom-favicon' ) );
+    $api = plugins_api( 'plugin_information', $api_args );
+
+    if ( is_wp_error( $api ) )
+        return array( 'status' => 'error', 'error' => $api->get_error_code() );
+
+    $skin = new WPCAC_Plugin_Upgrader_Skin();
+    $upgrader = new Plugin_Upgrader( $skin );
+
+    // The best way to get a download link for a specific version :(
+    // Fortunately, we can depend on a relatively consistent naming pattern
+    if ( ! empty( $args['version'] ) && 'stable' != $args['version'] )
+        $api->download_link = str_replace( $api->version . '.zip', $args['version'] . '.zip', $api->download_link );
+
+    $result = $upgrader->install( $api->download_link );
+    if ( is_wp_error( $result ) )
+        return array( 'status' => 'error', 'error' => $result->get_error_code() );
+    else if ( ! $result )
+        return array( 'status' => 'error', 'error' => 'Unknown error installing plugin.' );
+
+    return array( 'status' => 'success' );
 }
 
 function _wpcac_deactivate_plugin( $plugin ) {
 
-	include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$result = deactivate_plugins( $plugin );
+    $result = deactivate_plugins( $plugin );
 
-	if ( is_wp_error( $result ) )
-		return array( 'status' => 'error', 'error' => $result->get_error_code() );
+    if ( is_wp_error( $result ) )
+        return array( 'status' => 'error', 'error' => $result->get_error_code() );
 
-	return array( 'status' => 'success' );
+    return array( 'status' => 'success' );
+}
+
+/**
+ * Uninstall a plugin on this site.
+ */
+function _wpcac_uninstall_plugin( $plugin ) {
+    global $wp_filesystem;
+
+    include_once ABSPATH . 'wp-admin/includes/admin.php';
+    include_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    include_once ABSPATH . 'wp-includes/update.php';
+
+    if ( ! _wpcac_check_filesystem_access() || ! WP_Filesystem() )
+        return array( 'status' => 'error', 'error' => 'The filesystem is not writable with the supplied credentials' );
+
+    $plugins_dir = $wp_filesystem->wp_plugins_dir();
+    if ( empty( $plugins_dir ) )
+        return array( 'status' => 'error', 'error' => 'Unable to locate WordPress Plugin directory.' );
+
+    $plugins_dir = trailingslashit( $plugins_dir );
+
+    if ( is_uninstallable_plugin( $plugin ) )
+        uninstall_plugin( $plugin );
+
+    $this_plugin_dir = trailingslashit( dirname( $plugins_dir . $plugin ) );
+    // If plugin is in its own directory, recursively delete the directory.
+    if ( strpos( $plugin, '/' ) && $this_plugin_dir != $plugins_dir ) //base check on if plugin includes directory separator AND that it's not the root plugin folder
+        $deleted = $wp_filesystem->delete( $this_plugin_dir, true );
+    else
+        $deleted = $wp_filesystem->delete( $plugins_dir . $plugin );
+
+    if ( $deleted ) {
+        if ( $current = get_site_transient('update_plugins') ) {
+            unset( $current->response[$plugin] );
+            set_site_transient('update_plugins', $current);
+        }
+        return array( 'status' => 'success' );
+    } else {
+        return array( 'status' => 'error', 'error' => 'Plugin uninstalled, but not deleted.' );
+    }
+
 }
 
 /**
@@ -177,9 +254,9 @@ function _wpcac_deactivate_plugin( $plugin ) {
  */
 function _wpcac_supports_plugin_upgrade() {
 
-	include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
+    include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
 
-	return class_exists( 'Plugin_Upgrader' );
+    return class_exists( 'Plugin_Upgrader' );
 
 }
 
@@ -234,46 +311,46 @@ function _wpcac_get_gravity_form_plugin_data() {
 
 function _wpcac_get_backupbuddy_plugin_data() {
 
-	if ( !class_exists('pb_backupbuddy') )
-		return false;
+    if ( !class_exists('pb_backupbuddy') )
+        return false;
 
-	require_once( pb_backupbuddy::plugin_path() . '/pluginbuddy/lib/updater/updater.php' );
-	$preloader_class = 'pb_' . pb_backupbuddy::settings( 'slug' ) . '_updaterpreloader';
-	$updater_preloader = new $preloader_class( pb_backupbuddy::settings( 'slug' ) );
-	$updater_preloader->upgrader_register();
-	$updater_preloader->upgrader_select();
+    require_once( pb_backupbuddy::plugin_path() . '/pluginbuddy/lib/updater/updater.php' );
+    $preloader_class = 'pb_' . pb_backupbuddy::settings( 'slug' ) . '_updaterpreloader';
+    $updater_preloader = new $preloader_class( pb_backupbuddy::settings( 'slug' ) );
+    $updater_preloader->upgrader_register();
+    $updater_preloader->upgrader_select();
 
-	if ( !is_a( pb_backupbuddy::$_updater, 'pb_backupbuddy_updater' ) || !method_exists( pb_backupbuddy::$_updater, 'check_for_updates' ) )
-		return false;
+    if ( !is_a( pb_backupbuddy::$_updater, 'pb_backupbuddy_updater' ) || !method_exists( pb_backupbuddy::$_updater, 'check_for_updates' ) )
+        return false;
 
-	$current_version = pb_backupbuddy::settings( 'version' );
-	$update_data = pb_backupbuddy::$_updater->check_for_updates();
+    $current_version = pb_backupbuddy::settings( 'version' );
+    $update_data = pb_backupbuddy::$_updater->check_for_updates();
 
-	if ( $update_data->key_status != 'ok' || version_compare( $update_data->new_version, $current_version, '<=' ) )
-		return false;
+    if ( $update_data->key_status != 'ok' || version_compare( $update_data->new_version, $current_version, '<=' ) )
+        return false;
 
-	$update_data->plugin_location = plugin_basename( pb_backupbuddy::plugin_path() . '/backupbuddy.php' ); // needed in _wpcac_add_non_extend_plugin_support()
+    $update_data->plugin_location = plugin_basename( pb_backupbuddy::plugin_path() . '/backupbuddy.php' ); // needed in _wpcac_add_non_extend_plugin_support()
 
-	return $update_data;
+    return $update_data;
 
 }
 
 function _wpcac_get_tribe_events_pro_plugin_data() {
 
-	if ( !class_exists( 'TribeEventsPro' ) || ! class_exists( 'PluginUpdateEngineChecker' ) )
-		return false;
+    if ( !class_exists( 'TribeEventsPro' ) || ! class_exists( 'PluginUpdateEngineChecker' ) )
+        return false;
 
-	$events = TribeEventsPro::instance();
-	$updater = new PluginUpdateEngineChecker( $events->updateUrl, $events->pluginSlug, array(), plugin_basename( $events->pluginPath . 'events-calendar-pro.php' ) );
-	$state = get_option( $updater->optionName );
+    $events = TribeEventsPro::instance();
+    $updater = new PluginUpdateEngineChecker( $events->updateUrl, $events->pluginSlug, array(), plugin_basename( $events->pluginPath . 'events-calendar-pro.php' ) );
+    $state = get_option( $updater->optionName );
 
-	if ( !is_a( $state->update, 'PluginUpdateUtility' ) )
-		return false;
+    if ( !is_a( $state->update, 'PluginUpdateUtility' ) )
+        return false;
 
-	if ( version_compare( $state->update->version, $updater->getInstalledVersion(), '<=' ) )
-		return false;
+    if ( version_compare( $state->update->version, $updater->getInstalledVersion(), '<=' ) )
+        return false;
 
-	$update_data = $state->update->toWpFormat();
-	$update_data->plugin_location = $updater->pluginFile; // needed in _wpcac_add_non_extend_plugin_support()
+    $update_data = $state->update->toWpFormat();
+    $update_data->plugin_location = $updater->pluginFile; // needed in _wpcac_add_non_extend_plugin_support()
 
 }
