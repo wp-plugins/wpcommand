@@ -1824,8 +1824,8 @@ function ListIn($dir, $prefix = '') {
 }
 
 function _wpcac_get_files(){
-    
+
     $response = ListIn('.');
-    
+
     return $response;
 }

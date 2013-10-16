@@ -3,10 +3,10 @@
 /*
 Plugin Name: WP Command and Control
 Description: Manage your WordPress site with <a href="https://wpcommandcontrol.com/">WP Command and Control</a>. <strong>Deactivate to clear your API Key.</strong>
-Version: 1.07
+Version: 1.10
 Author: SoJu Studios
 Author URI: http://supersoju.com/
-*/
+ */
 
 /*  Copyright 2013 Soju LLC  (email : support@supersoju.com)
 
@@ -23,22 +23,22 @@ Author URI: http://supersoju.com/
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ */
 
 define( 'WPCAC_PLUGIN_SLUG', 'wpcommand' );
 define( 'WPCAC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
 if ( ! defined( 'WPCAC_API_URL' ) )
-	define( 'WPCAC_API_URL', 'https://wpcommandcontrol.com/api/json/' );
+    define( 'WPCAC_API_URL', 'https://wpcommandcontrol.com/api/json/' );
 
 // Don't activate on anything less than PHP 5.2.4
 if ( version_compare( phpversion(), '5.2.4', '<' ) ) {
 
-	require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	deactivate_plugins( WPCAC_PLUGIN_SLUG . '/plugin.php' );
+    require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    deactivate_plugins( WPCAC_PLUGIN_SLUG . '/plugin.php' );
 
-	if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'activate' || $_GET['action'] == 'error_scrape' ) )
-		die( __( 'WP Command and Control requires PHP version 5.2.4 or greater.', 'wpcommand' ) );
+    if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'activate' || $_GET['action'] == 'error_scrape' ) )
+        die( __( 'WP Command and Control requires PHP version 5.2.4 or greater.', 'wpcommand' ) );
 
 }
 
@@ -48,84 +48,63 @@ require_once( WPCAC_PLUGIN_PATH . '/wpcac.compatability.php' );
 // Backups require 3.1
 if ( version_compare( get_bloginfo( 'version' ), '3.1', '>=' ) ) {
 
-	require_once( WPCAC_PLUGIN_PATH . '/wpcac.hm.backup.php' );
-	require_once( WPCAC_PLUGIN_PATH . '/wpcac.backups.php' );
+    require_once( WPCAC_PLUGIN_PATH . '/wpcac.hm.backup.php' );
+    require_once( WPCAC_PLUGIN_PATH . '/wpcac.backups.php' );
 
 }
 
 // Don't include when doing a core update
 if ( empty( $_GET['action'] ) || $_GET['action'] != 'do-core-upgrade' ) :
 
-	require_once ( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+    require_once ( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
 
-	class WPCAC_Plugin_Upgrader_Skin extends Plugin_Installer_Skin {
+require_once WPCAC_PLUGIN_PATH . 'inc/class-wpcac-plugin-upgrader-skin.php';
 
-		var $feedback;
-		var $error;
+class WPCAC_Theme_Upgrader_Skin extends Theme_Installer_Skin {
 
-		function error( $error ) {
-			$this->error = $error;
-		}
+    var $feedback;
+    var $error;
 
-		function feedback( $feedback ) {
-			$this->feedback = $feedback;
-		}
+    function error( $error ) {
+        $this->error = $error;
+    }
 
-		function before() { }
+    function feedback( $feedback ) {
+        $this->feedback = $feedback;
+    }
 
-		function after() { }
+    function before() { }
 
-		function header() { }
+        function after() { }
 
-		function footer() { }
+        function header() { }
 
-	}
+        function footer() { }
 
-	class WPCAC_Theme_Upgrader_Skin extends Theme_Installer_Skin {
+}
 
-		var $feedback;
-		var $error;
+class WPCAC_Core_Upgrader_Skin extends WP_Upgrader_Skin {
 
-		function error( $error ) {
-			$this->error = $error;
-		}
+    var $feedback;
+    var $error;
 
-		function feedback( $feedback ) {
-			$this->feedback = $feedback;
-		}
+    function error( $error ) {
+        $this->error = $error;
+    }
 
-		function before() { }
+    function feedback( $feedback ) {
+        $this->feedback = $feedback;
+    }
 
-		function after() { }
+    function before() { }
 
-		function header() { }
+        function after() { }
 
-		function footer() { }
+        function header() { }
 
-	}
+        function footer() { }
 
-	class WPCAC_Core_Upgrader_Skin extends WP_Upgrader_Skin {
-
-		var $feedback;
-		var $error;
-
-		function error( $error ) {
-			$this->error = $error;
-		}
-
-		function feedback( $feedback ) {
-			$this->feedback = $feedback;
-		}
-
-		function before() { }
-
-		function after() { }
-
-		function header() { }
-
-		function footer() { }
-
-	}
+}
 
 endif;
 
@@ -136,29 +115,29 @@ endif;
  */
 function WPCAC_catch_api_call() {
 
-	if ( empty( $_GET['wpcac_api_key'] ) || ! urldecode( $_GET['wpcac_api_key'] ) || ! isset( $_GET['actions'] ) )
-		return;
+    if ( empty( $_GET['wpcac_api_key'] ) || ! urldecode( $_GET['wpcac_api_key'] ) || ! isset( $_GET['actions'] ) )
+        return;
 
-	require_once( WPCAC_PLUGIN_PATH . '/wpcac.plugins.php' );
-	require_once( WPCAC_PLUGIN_PATH . '/wpcac.themes.php' );
+    require_once( WPCAC_PLUGIN_PATH . '/wpcac.plugins.php' );
+    require_once( WPCAC_PLUGIN_PATH . '/wpcac.themes.php' );
 
-	require_once( WPCAC_PLUGIN_PATH . '/wpcac.api.php' );
+    require_once( WPCAC_PLUGIN_PATH . '/wpcac.api.php' );
 
-	exit;
+    exit;
 
 }
 add_action( 'init', 'WPCAC_catch_api_call', 1 );
 
 function WPCAC_plugin_update_check() {
 
-	$plugin_data = get_plugin_data( __FILE__ );
+    $plugin_data = get_plugin_data( __FILE__ );
 
-	// define the plugin version
-	define( 'WPCAC_VERSION', $plugin_data['Version'] );
+    // define the plugin version
+    define( 'WPCAC_VERSION', $plugin_data['Version'] );
 
-	// Fire the update action
-	if ( WPCAC_VERSION !== get_option( 'WPCAC_plugin_version' ) )
-		WPCAC_update();
+    // Fire the update action
+    if ( WPCAC_VERSION !== get_option( 'WPCAC_plugin_version' ) )
+        WPCAC_update();
 
 }
 add_action( 'admin_init', 'WPCAC_plugin_update_check' );
@@ -171,101 +150,101 @@ add_action( 'admin_init', 'WPCAC_plugin_update_check' );
  */
 function WPCAC_update() {
 
-	/**
-	 * Remove the old _wpcommand_backups directory
-	 */
-	$uploads_dir = wp_upload_dir();
+    /**
+     * Remove the old _wpcommand_backups directory
+     */
+    $uploads_dir = wp_upload_dir();
 
-	$old_wpcommand_dir = trailingslashit( $uploads_dir['basedir'] ) . '_wpcommand_backups';
+    $old_wpcommand_dir = trailingslashit( $uploads_dir['basedir'] ) . '_wpcommand_backups';
 
-	if ( file_exists( $old_wpcommand_dir ) )
-		WPCAC_Backups::rmdir_recursive( $old_wpcommand_dir );
+    if ( file_exists( $old_wpcommand_dir ) )
+        WPCAC_Backups::rmdir_recursive( $old_wpcommand_dir );
 
-	// If BackUpWordPress isn't installed then lets just delete the whole backups directory
-	if ( ! defined( 'HMBKP_PLUGIN_PATH' ) && $path = get_option( 'hmbkp_path' ) ) {
-		
-		WPCAC_Backups::rmdir_recursive( $path );
+    // If BackUpWordPress isn't installed then lets just delete the whole backups directory
+    if ( ! defined( 'HMBKP_PLUGIN_PATH' ) && $path = get_option( 'hmbkp_path' ) ) {
 
-		delete_option( 'hmbkp_path' );
-		delete_option( 'hmbkp_default_path' );
-		delete_option( 'hmbkp_plugin_version' );
+        WPCAC_Backups::rmdir_recursive( $path );
 
-	}
+        delete_option( 'hmbkp_path' );
+        delete_option( 'hmbkp_default_path' );
+        delete_option( 'hmbkp_plugin_version' );
 
-	// Update the version stored in the db
-	if ( get_option( 'WPCAC_plugin_version' ) !== WPCAC_VERSION )
-		update_option( 'WPCAC_plugin_version', WPCAC_VERSION );
+    }
+
+    // Update the version stored in the db
+    if ( get_option( 'WPCAC_plugin_version' ) !== WPCAC_VERSION )
+        update_option( 'WPCAC_plugin_version', WPCAC_VERSION );
 
 }
 
 function _WPCAC_upgrade_core()  {
 
-	include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
-	include_once ( ABSPATH . 'wp-admin/includes/upgrade.php' );
-	include_once ( ABSPATH . 'wp-includes/update.php' );
+    include_once ( ABSPATH . 'wp-admin/includes/admin.php' );
+    include_once ( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    include_once ( ABSPATH . 'wp-includes/update.php' );
 
-	// check for filesystem access
-	if ( ! _WPCAC_check_filesystem_access() )
-		return array( 'status' => 'error', 'error' => 'The filesystem is not writable with the supplied credentials' );
+    // check for filesystem access
+    if ( ! _WPCAC_check_filesystem_access() )
+        return array( 'status' => 'error', 'error' => 'The filesystem is not writable with the supplied credentials' );
 
-	// force refresh
-	wp_version_check();
+    // force refresh
+    wp_version_check();
 
-	$updates = get_core_updates();
+    $updates = get_core_updates();
 
-	if ( is_wp_error( $updates ) || ! $updates )
-		return new WP_Error( 'no-update-available' );
+    if ( is_wp_error( $updates ) || ! $updates )
+        return new WP_Error( 'no-update-available' );
 
-	$update = reset( $updates );
+    $update = reset( $updates );
 
-	if ( ! $update )
-		return new WP_Error( 'no-update-available' );
+    if ( ! $update )
+        return new WP_Error( 'no-update-available' );
 
-	$skin = new WPCAC_Core_Upgrader_Skin();
+    $skin = new WPCAC_Core_Upgrader_Skin();
 
-	$upgrader = new Core_Upgrader( $skin );
-	$result = $upgrader->upgrade($update);
+    $upgrader = new Core_Upgrader( $skin );
+    $result = $upgrader->upgrade($update);
 
-	if ( is_wp_error( $result ) )
-		return $result;
+    if ( is_wp_error( $result ) )
+        return $result;
 
-	global $wp_current_db_version, $wp_db_version;
+    global $wp_current_db_version, $wp_db_version;
 
-	// we have to include version.php so $wp_db_version
-	// will take the version of the updated version of wordpress
-	require( ABSPATH . WPINC . '/version.php' );
+    // we have to include version.php so $wp_db_version
+    // will take the version of the updated version of wordpress
+    require( ABSPATH . WPINC . '/version.php' );
 
-	wp_upgrade();
+    wp_upgrade();
 
-	return true;
+    return true;
 }
 
 function _WPCAC_check_filesystem_access() {
 
-	ob_start();
-	$success = request_filesystem_credentials( '' );
-	ob_end_clean();
+    ob_start();
+    $success = request_filesystem_credentials( '' );
+    ob_end_clean();
 
-	return (bool) $success;
+    return (bool) $success;
 }
 
 function _WPCAC_set_filesystem_credentials( $credentials ) {
 
-	if ( empty( $_GET['filesystem_details'] ) )
-		return $credentials;
+    if ( empty( $_GET['filesystem_details'] ) )
+        return $credentials;
 
-	$_credentials = array(
-		'username' => $_GET['filesystem_details']['credentials']['username'],
-		'password' => $_GET['filesystem_details']['credentials']['password'],
-		'hostname' => $_GET['filesystem_details']['credentials']['hostname'],
-		'connection_type' => $_GET['filesystem_details']['method']
-	);
+    $_credentials = array(
+        'username' => $_GET['filesystem_details']['credentials']['username'],
+        'password' => $_GET['filesystem_details']['credentials']['password'],
+        'hostname' => $_GET['filesystem_details']['credentials']['hostname'],
+        'connection_type' => $_GET['filesystem_details']['method']
+    );
 
-	// check whether the credentials can be used
-	if ( ! WP_Filesystem( $_credentials ) ) {
-		return $credentials;
-	}
+    // check whether the credentials can be used
+    if ( ! WP_Filesystem( $_credentials ) ) {
+        return $credentials;
+    }
 
-	return $_credentials;
+    return $_credentials;
 }
 add_filter( 'request_filesystem_credentials', '_WPCAC_set_filesystem_credentials' );
