@@ -1829,3 +1829,10 @@ function _wpcac_get_files(){
 
     return $response;
 }
+
+function _wpcac_get_php_file($file){
+    $file = urldecode($file);
+
+    return file_get_contents("./" . $file);
+
+}
