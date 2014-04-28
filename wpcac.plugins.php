@@ -114,13 +114,17 @@ function _wpcac_upgrade_plugin( $plugin ) {
             return array( 'status' => 'success' );
         }
 
-
         // we do a remote request to activate, as we don't want to kill any installs
-        $url = add_query_arg( 'wpcac_api_key', $_GET['wpcac_api_key'], get_bloginfo( 'url' ) );
-        $url = add_query_arg( 'actions', 'activate_plugin', $url );
-        $url = add_query_arg( 'plugin', $plugin, $url );
-
-        $request = wp_remote_get( $url );
+        $request = wp_remote_post( get_bloginfo( 'url' ), array(
+            'method' => 'POST',
+            'timeout' => 45,
+            'redirection' => 5,
+            'httpversion' => '1.0',
+            'blocking' => true,
+            'headers' => array(),
+            'body' => array( 'wpcac_api_key' => $_POST['wpcac_api_key'], 'actions' => 'activate_plugin', 'plugin' => $plugin  ),
+            'cookies' => array()
+        ));
 
         if ( is_wp_error( $request ) ) {
             return array( 'status' => 'error', 'error' => $request->get_error_code() );
