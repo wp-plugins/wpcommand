@@ -26,61 +26,72 @@ function wpcac_add_api_key_admin_notice() { ?>
     } else {
         include('wpcac.config.php');
     };
-if($remoteapikey){
-    $siteurl = get_site_url();
-    $response = file_get_contents("https://wpcommandcontrol.com/client/getkey?api_key=" . $remoteapikey . "&siteurl=" . $siteurl);
-    if( $response ) {
-        $api_key = $response;
-        add_option( 'wpcac_serviceapi_key', $remoteapikey );
-        add_option( 'wpcac_api_key', $api_key );
-    } else {
-        $api_key = "error";
-        //error for some reason
-    };
-?>
+    if($remoteapikey){
+        $siteurl = get_site_url();
+        $response = wp_remote_post( 'https://wpcommandcontrol.com/client/getkey', array(
+                'method' => 'POST',
+                'timeout' => 45,
+                'redirection' => 5,
+                'httpversion' => '1.0',
+                'blocking' => true,
+                'headers' => array(),
+                'body' => array( 'accountapi' => $remoteapikey, 'siteurl' => $siteurl ),
+                'cookies' => array()
+                )
+            );
+        if( $response ) {
+            $data = json_decode($response['body']);
+            if(isset($data->status) && isset($data->api_key) && $data->status == 1){
+                $api_key = $data->api_key;
+                add_option( 'wpcac_serviceapi_key', $remoteapikey );
+                add_option( 'wpcac_api_key', $api_key );
+            } else {
+                $api_key = "error";
+            };
+        } else {
+            $api_key = "error";
+            //error for some reason
+        };
+    ?>
                 <div id="wpcacp-message" class="updated">
-            <p>
+                    <?php if($api_key == "error"){ ?>
+                    <p><strong>There was a problem automatically configuring your site. Please enter your site's API key below. <?php echo $remoteapikey; ?></strong></p>
+                        <form method="post" action="options.php">
+                            <p>
+                                <strong>WP Command and Control is almost ready</strong>, <label style="vertical-align: baseline;" for="wpcac_api_key">enter your API Key to continue</label>
+                                <input type="text" style="margin-left: 5px; margin-right: 5px; " class="code regular-text" id="wpcac_api_key" name="wpcac_api_key" />
+                                <input type="submit" value="Save API Key" class="button-primary" />
+                            </p>
+                            <style>#message { display : none; }</style>
+                        </form>
+                    <?php } else { ?>
+                        <p><strong>WP Command and Control was automatically configured.</strong></p>
+                    <?php }; ?>
+                <style>#message { display : none; }</style>
+    <?php
+        // Output any sections defined for page sl-settings
+        do_settings_sections( 'wpcac-settings' ); ?>
 
-                <strong>WP Command and Control was automatically configured.</strong>
-            </p>
-            <style>#message { display : none; }</style>
-<?php
-    // Output any sections defined for page sl-settings
-    do_settings_sections( 'wpcac-settings' ); ?>
+        </div>
 
-    </div>
+    <?php
+    } else {
+    ?>
+        <div id="wpcacp-message" class="updated">
+            <form method="post" action="options.php">
+                <p>
+                    <strong>WP Command and Control is almost ready</strong>, <label style="vertical-align: baseline;" for="wpcac_api_key">enter your API Key to continue</label>
+                    <input type="text" style="margin-left: 5px; margin-right: 5px; " class="code regular-text" id="wpcac_api_key" name="wpcac_api_key" />
+                    <input type="submit" value="Save API Key" class="button-primary" />
+                </p>
+                <style>#message { display : none; }</style>
+                <?php settings_fields( 'wpcac-settings' );
+                do_settings_sections( 'wpcac-settings' ); ?>
+            </form>
+        </div>
 
-<?php
-} else {
-?>
-    <div id="wpcacp-message" class="updated">
-
-        <form method="post" action="options.php">
-
-            <p>
-
-                <strong>WP Command and Control is almost ready</strong>, <label style="vertical-align: baseline;" for="wpcac_api_key">enter your API Key to continue</label>
-
-                <input type="text" style="margin-left: 5px; margin-right: 5px; " class="code regular-text" id="wpcac_api_key" name="wpcac_api_key" />
-
-                <input type="submit" value="Save API Key" class="button-primary" />
-
-            </p>
-
-            <style>#message { display : none; }</style>
-
-<?php settings_fields( 'wpcac-settings' );
-
-// Output any sections defined for page sl-settings
-do_settings_sections( 'wpcac-settings' ); ?>
-
-        </form>
-
-    </div>
-
-
-<?php
-};
+    <?php
+    };
 };
 
 if ( ! get_option( 'wpcac_api_key' ) )

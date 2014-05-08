@@ -59,7 +59,7 @@ foreach( $actions as $action => $value ) {
 
         // TODO should be dynamic
     case 'get_plugin_version' :
-        $actions[$action] = '1.25';
+        $actions[$action] = '1.26';
         break;
 
     /*
