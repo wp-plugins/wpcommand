@@ -55,7 +55,7 @@ function wpcac_add_api_key_admin_notice() { ?>
     ?>
                 <div id="wpcacp-message" class="updated">
                     <?php if($api_key == "error"){ ?>
-                    <p><strong>There was a problem automatically configuring your site. Please enter your site's API key below. <?php echo $remoteapikey; ?></strong></p>
+                    <p><strong>There was a problem automatically configuring your site. Please enter your site's API key below.</strong></p>
                         <form method="post" action="options.php">
                             <p>
                                 <strong>WP Command and Control is almost ready</strong>, <label style="vertical-align: baseline;" for="wpcac_api_key">enter your API Key to continue</label>
