@@ -3,7 +3,7 @@
 /*
 Plugin Name: WP Command and Control
 Description: Manage your WordPress site with <a href="https://wpcommandcontrol.com/">WP Command and Control</a>. <strong>Deactivate to clear your API Key.</strong>
-Version: 1.25
+Version: 2.0
 Author: SoJu Studios
 Author URI: http://supersoju.com/
  */
@@ -107,6 +107,204 @@ class WPCAC_Core_Upgrader_Skin extends WP_Upgrader_Skin {
 }
 
 endif;
+
+/**
+ * Admin Panel
+ */
+
+if ( ! class_exists( 'AdminPageFramework' ) ) {
+    include_once( dirname( __FILE__ ) . '/library/admin-page-framework.min.php' );
+};
+
+class WPCAC_CreatePageGroup extends AdminPageFramework {
+    // Define the setUp() method to set how many pages, page titles and icons etc.
+    public function setUp() {
+        // Creates the root menu
+        $this->setRootMenuPage(
+            'WPCmdCtrl',    // specify the name of the page group
+            get_bloginfo('url') . '/wp-content/plugins/wpcommand/images/16x16.png'    // use 16 by 16 image for the menu icon.
+        );
+        // Adds the sub menus and the pages
+        $this->addSubMenuItems(
+            array(
+                'title' => 'Site Status',        // page title
+                'page_slug' => 'wpcac_status',    // page slug
+            ),
+            array(
+                'title' => 'API Keys',        // page title
+                'page_slug' => 'wpcac_api_keys',    // page slug
+            )
+            
+        );
+    }
+    // Notice that the name of the method is 'do_' + the page slug.
+    // So the slug should not contain characters which cannot be used in function names such as dots and hyphens.
+    public function do_wpcac_status() {
+        $api_url = "https://wpcommandcontrol.com";
+        ?>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Site Status</h2>
+                <div id="wpcac-service-messages"></div>
+            </div>
+            <div class="col-md-7 wpcac-results">
+                <h3>Malware Check <a href="#" id="btn-scannow" class="btn btn-primary">Scan Now</a></h3>
+                <div id="wpcac-malware-messages"></div>
+                <div id="wpcac-malware">
+                    <img src="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/images/spinner.gif" />
+                </div>
+                <h3>Backups</h3>
+                <div id="wpcac-backups">
+                    <img src="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/images/spinner.gif" />
+                </div>
+                <h3>Site Response</h3>
+                <div id="wpcac-pingtime">
+                <p class="avg"><i class="glyphicon"></i> Average Pingtime over last 24 hours: <span><img src="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/images/spinner.gif" /></span> seconds</p>
+                <p class="shortest"><i class="glyphicon"></i> Best: <span><img src="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/images/spinner.gif" /></span> seconds</p>
+                <p class="longest"><i class="glyphicon"></i> Worst: <span><img src="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/images/spinner.gif" /></span> seconds</p>
+                </div>
+            </div>
+            <div id="wpcac-sucuri" class="col-md-4">
+                <div class="well">
+                    <h3><a href="http://wpcommandcontrol.com/client/sucuri" target="_blank">Preventive Website Security in the cloud from Sucuri!</a></h3>
+                    <ul>
+                        <li>Web Application Firewall (WAF) Protection</li>
+                        <li>Virtual Website Patching</li>
+                        <li>Cloud Intrusion Prevention System (IPS)</li>
+                        <li>High Security Website Monitoring</li>
+                    <li>Malicious Traffic Filtering</li>
+                    </ul>
+                    <p><a href="http://wpcommandcontrol.com/client/sucuri" class="btn btn-primary" target="_blank">Sign up now</a> <a href="http://wpcommandcontrol.com/client/sucuri" class="btn btn-primary" target="_blank">Read more</a></p>
+                    <iframe width="100%" height="315" src="//www.youtube-nocookie.com/embed/QV3OfHmEq5c" frameborder="0" allowfullscreen></iframe>
+
+                </div>
+            </div>
+        </div>
+<link rel="stylesheet" href="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/wpcommand/css/bootstrap.css">
+        <script type="text/javascript">
+        jQuery(function() {
+            jQuery("#btn-scannow").click( function() {
+                jQuery(this).fadeOut();
+                jQuery.post( "<?php echo $api_url; ?>/client/api/json?callback=", { method: "scan", site_url: "<?php echo get_bloginfo('url'); ?>", api_key: "<?php echo get_option( 'wpcac_api_key' ); ?>" });
+                jQuery("<p class='bg-info' style='padding: 0.5em'>Security scan scheduled, please check back in a few minutes.</p>").appendTo("#wpcac-malware-messages");
+            });
+            <?php
+        $blog_url = get_bloginfo('url');
+        $api_key = get_option('wpcac_api_key');
+            ?>
+            jQuery.post( "<?php echo $api_url; ?>/client/api/json?callback=", { method: "site_info", site_url: "<?php echo $blog_url; ?>", api_key: "<?php echo $api_key; ?>" }, function(data) {
+                if(data.status == "success"){
+                    jQuery('#wpcac-pingtime .avg span').text(data.pingtime.avg);
+                    jQuery('#wpcac-pingtime .shortest span').text(data.pingtime.shortest);
+                    jQuery('#wpcac-pingtime .longest span').text(data.pingtime.longest);
+                    if(data.last_backup){
+                        jQuery('#wpcac-backups').html("<i class='glyphicon glyphicon-ok text-success'></i> Last Backup on: " + data.last_backup + " (GMT)");
+                    } else {
+                        jQuery('#wpcac-backups').html("<i class='glyphicon glyphicon-flash text-warning'></i> No backups yet.");
+                    };
+
+                    if(data.pingtime.avg < 2){
+                        jQuery('#wpcac-pingtime .avg span').addClass('text-success');
+                        jQuery('#wpcac-pingtime .avg i').addClass('glyphicon-ok text-success');
+                    } else {
+                        if(data.pingtime.avg > 2 && data.pingtime.avg < 5){
+                            jQuery('#wpcac-pingtime .avg span').addClass('text-warning');
+                            jQuery('#wpcac-pingtime .avg i').addClass('glyphicon-flash text-warning');
+                        } else {
+                            jQuery('#wpcac-pingtime .avg span').addClass('text-danger');
+                            jQuery('#wpcac-pingtime .avg i').addClass('glyphicon-remove text-danger');
+                        };
+                    };
+                    if(data.pingtime.shortest < 2){
+                        jQuery('#wpcac-pingtime .shortest span').addClass('text-success');
+                        jQuery('#wpcac-pingtime .shortest i').addClass('glyphicon-ok text-success');
+                    } else {
+                        if(data.pingtime.shortest > 2 && data.pingtime.shortest < 5){
+                            jQuery('#wpcac-pingtime .shortest span').addClass('text-warning');
+                            jQuery('#wpcac-pingtime .shortest i').addClass('glyphicon-flash text-warning');
+                        } else {
+                            jQuery('#wpcac-pingtime .shortest span').addClass('text-danger');
+                            jQuery('#wpcac-pingtime .shortest i').addClass('glyphicon-remove text-danger');
+                        };
+                    };
+                    if(data.pingtime.longest < 2){
+                        jQuery('#wpcac-pingtime .longest span').addClass('text-success');
+                        jQuery('#wpcac-pingtime .longest i').addClass('glyphicon-ok text-success');
+                    } else {
+                        if(data.pingtime.longest > 2 && data.pingtime.longest < 4){
+                            jQuery('#wpcac-pingtime .longest span').addClass('text-warning');
+                            jQuery('#wpcac-pingtime .longest i').addClass('glyphicon-flash text-warning');
+                        } else {
+                            jQuery('#wpcac-pingtime .longest span').addClass('text-danger');
+                            jQuery('#wpcac-pingtime .longest i').addClass('glyphicon-remove text-danger');
+                        };
+                    };
+    
+                    var malwaretext = "";
+                    malwaretext = malwaretext + "<p>Last scan: " + data.scandate + "</p>";
+                    if(data.rawscan.MALWARE && data.rawscan.MALWARE.WARN){
+                        malwaretext = malwaretext + "<p><i class='glyphicon glyphicon-remove text-danger'></i> <strong>Possible Malware: </strong></p>";
+                        jQuery.each(data.rawscan.MALWARE.WARN, function(i, warning){
+                            malwaretext = malwaretext + "<li><i class='glyphicon glyphicon-remove text-danger'></i> <strong>" + warning + "</strong></li>";
+                        });
+                    } else {
+                        malwaretext = malwaretext + "<p><i class='glyphicon glyphicon-ok text-success'></i> <strong>No Malware Detected</strong></p>";
+                    };
+                    if(data.rawscan.BLACKLIST && data.rawscan.BLACKLIST.WARN){
+                        malwaretext = malwaretext + "<p><i class='glyphicon glyphicon-remove text-danger'></i> <strong>Site is on the following blacklists:</strong></p>";
+                    } else {
+                        malwaretext = malwaretext + "<p><i class='glyphicon glyphicon-ok text-success'></i> <strong>Site is not blacklisted</strong></p>";
+                        jQuery.each(data.rawscan.BLACKLIST.INFO, function(i, warning){
+                            malwaretext = malwaretext + "<li><i class='glyphicon glyphicon-ok text-success'></i> <strong>" + warning + "</strong></li>";
+                        });
+                    };
+                    jQuery('#wpcac-malware').html(malwaretext);
+                } else {
+                    jQuery('#wpcac-service-messages').html("<p class='bg-warning' style='padding: 0.5em'>Error contacting WPCmdCtrl Service.</p>");
+                    jQuery('.wpcac-results').hide();
+                };
+                }, "json");
+            });
+        </script>
+        <?php
+    }
+
+    public function do_wpcac_api_keys() {
+        $api_key = get_option( 'wpcac_api_key' );
+        $remoteapikey = get_option( 'wpcac_serviceapi_key' );
+?>
+        <h3>API Keys</h3>
+<?php
+        if($api_key){
+        ?>
+        <p>Site API Key active!</p>
+
+<?php
+            if($remoteapikey){
+?>
+            <p>Account API Key active!</p>
+    <?php
+            };
+        } else {
+?>
+                        <form method="post" action="options.php">
+                            <p>
+                                <strong>WP Command and Control is almost ready</strong>, <label style="vertical-align: baseline;" for="wpcac_api_key">enter your API Key to continue</label></p>
+                                <p><input type="text" class="code regular-text" id="wpcac_api_key" name="wpcac_api_key" />
+                                <input type="submit" value="Save API Key" class="button-primary" />
+                            </p>
+                            <style>#message { display : none; }</style>
+                        </form>
+        <?php
+        };
+    }
+    
+}
+
+// Instantiate the class object.
+if ( is_admin() ) {
+    new WPCAC_CreatePageGroup;
+};
 
 /**
  * Catch the API calls and load the API

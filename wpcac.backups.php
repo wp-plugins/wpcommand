@@ -166,7 +166,7 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
          */
         public function cleanup() {
 
-            $zips = glob( $this->get_path() . '/*.zip' );
+            $zips = glob( $this->get_path() . '/*.*' );
 
             // Remove any .zip files
             foreach ( $zips as $zip )

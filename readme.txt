@@ -2,21 +2,23 @@
 Contributors: supersoju
 Tags: wpcommand, wpcontrol, remote administration, multiple wordpress
 Requires at least: 3.1
-Tested up to: 3.8.1
-Stable tag: 1.25
+Tested up to: 3.9.1
+Stable tag: 2.0
 
 WP Command and Control allows you to manage multiple WordPress installs from a single dashboard.
 
 == Description ==
 
-The WP Command and Control WordPress Plugin works with [WP Command and Control](http://www.wpcommandcontrol.com/) to remotely manage all your WordPress sites. WP Command and Control is currently in private beta, please visit [WP Command and Control](http://www.wpcommandcontrol.com/) to join the annoucement list.
+The WP Command and Control WordPress Plugin works with [WP Command and Control](http://www.wpcommandcontrol.com/) to remotely manage all your WordPress sites. 
 
 = Features =
 
 * Track each of your WordPress installs version and plugin info.
-* Manually or automatically update any or all of your WordPress core installs or plugins.
-* Schedule automated off-site backups
-* Schedule automated plugin updates
+* Manually or automatically update any or all of your WordPress core installs, themes or plugins.
+* Automated off-site backups
+* Automated plugin updates
+* Automated Malware and Blacklist scanning
+* Site performance and uptime reporting
 * Generate plugin and core update reports for each of your sites
 * Automatically add a new WordPress site to your WP Command and Control account just by activting the plugin
 
@@ -31,6 +33,14 @@ You can email us at support@wpcommandcontrol.com for support.
 3. Sign up for an account at wpcommandcontrol.com and add your site.
 
 == Changelog ==
+
+#### 2.0
+
+* New options page. Intergrated Security and Malware scans provided by Sucuri
+
+#### 1.25
+
+* Improved security
 
 #### 1.11
 
