@@ -10,6 +10,7 @@ function wpcac_get_incompatible_plugins() {
         'BulletProof Security',
         'Wordfence Security',
         'Better WP Security',
+        'iThemes Security',
         'Wordpress Firewall 2'
     );
 

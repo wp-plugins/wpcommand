@@ -59,7 +59,7 @@ foreach( $actions as $action => $value ) {
 
         // TODO should be dynamic
     case 'get_plugin_version' :
-        $actions[$action] = '2.0';
+        $actions[$action] = '2.01';
         break;
 
     /*
@@ -162,6 +162,17 @@ foreach( $actions as $action => $value ) {
     }
 
 }
+
+foreach ( $actions as $key => $action ) {
+
+    if ( is_wp_error( $action ) ) {
+
+        $actions[$key] = (object) array(
+            'errors' => $action->errors
+        );
+    }
+}
+
 
 echo json_encode( $actions );
 
