@@ -3,7 +3,7 @@
 /*
 Plugin Name: WP Command and Control
 Description: Manage your WordPress site with <a href="https://wpcommandcontrol.com/">WP Command and Control</a>. <strong>Deactivate to clear your API Key.</strong>
-Version: 2.01
+Version: 2.2.0
 Author: SoJu Studios
 Author URI: http://supersoju.com/
  */
@@ -339,6 +339,32 @@ function WPCAC_plugin_update_check() {
 
 }
 add_action( 'admin_init', 'WPCAC_plugin_update_check' );
+
+/**
+ * Flush rewrite rules
+ *
+ * @access public
+ * @return void
+ */
+function _wpcac_flush_rewrite_rules() {
+
+    global $wp_rewrite;
+    return $wp_rewrite->flush_rules(true);
+    return "success";
+}
+
+/**
+ * Set WP Option Value
+ *
+ * @access public
+ * @return void
+ */
+function _wpcac_set_option( $option_name, $option_value ) {
+
+    update_option( $option_name, $option_value );
+    return "success";
+}
+
 
 /**
  * Run any update code and update the current version in the db

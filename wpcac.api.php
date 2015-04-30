@@ -1,5 +1,7 @@
 <?php
 
+$plugin_version = '2.2.0';
+
 // Check the API Key
 if ( ! get_option( 'wpcac_api_key' ) ) {
 
@@ -57,9 +59,8 @@ foreach( $actions as $action => $value ) {
     // TODO should namespace api methods?
     switch( $action ) {
 
-        // TODO should be dynamic
     case 'get_plugin_version' :
-        $actions[$action] = '2.01';
+        $actions[$action] = $plugin_version;
         break;
 
     /*
@@ -125,6 +126,10 @@ foreach( $actions as $action => $value ) {
         $actions[$action] = _wpcac_get_files();
         break;
 
+    case 'flush_rewrite' :
+        $actions[$action] = _wpcac_flush_rewrite_rules();
+        break;
+
     case 'get_php_file' :
         $actions[$action] = _wpcac_get_php_file(sanitize_text_field( $_POST['file'] ) );
         break;
@@ -152,6 +157,13 @@ foreach( $actions as $action => $value ) {
     case 'get_option_value' :
         $actions[$action] = array(
             sanitize_text_field( $_POST['option_name']) => get_option((string) sanitize_text_field( $_POST['option_name'] ))
+        );
+        break;
+
+    case 'set_option_value' :
+        $actions[$action] = _wpcac_set_option(
+            sanitize_text_field($_POST['option_name']),
+            sanitize_text_field($_POST['option_value'])
         );
         break;
 
