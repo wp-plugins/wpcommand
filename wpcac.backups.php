@@ -136,7 +136,7 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
             // Append the secret key on apache servers
             if ( $is_apache && $this->key() ) {
 
-                $backup = add_query_arg( 'key', $this->key(), $backup );
+                $backup = esc_url(add_query_arg( 'key', $this->key(), $backup ));
 
                 // Force the .htaccess to be rebuilt
                 if ( file_exists( $this->get_path() . '/.htaccess' ) )
@@ -210,7 +210,7 @@ class WPCAC_Backups extends WPCAC_HM_Backup {
 
             // we dont know the size yet, fire off a remote request to get it for later
             // it can take some time so we have a small timeout then return "Calculating"
-            wp_remote_get( add_query_arg( array( 'action' => 'wpcac_calculate_backup_size', 'backup_excludes' => $this->get_excludes() ), admin_url( 'admin-ajax.php' ) ), array( 'timeout' => 0.1, 'sslverify' => false ) );
+            wp_remote_get( esc_url(add_query_arg( array( 'action' => 'wpcac_calculate_backup_size', 'backup_excludes' => $this->get_excludes() ), admin_url( 'admin-ajax.php' ) ), array( 'timeout' => 0.1, 'sslverify' => false ) ) );
 
             return 'Calculating';
 
@@ -349,7 +349,11 @@ endswitch;
                 $contents[] = '</IfModule>';
                 $contents[] = '';
 
-                insert_with_markers( $htaccess, 'WP Command Backup', $contents );
+                if(get_option( 'wpcac_no_htaccess' ) && get_option( 'wpcac_no_htaccess' ) == "1"){
+                    //Not writing
+                } else {
+                    insert_with_markers( $htaccess, 'WP Command Backup', $contents );
+                };
 
             }
 
@@ -364,17 +368,19 @@ endswitch;
          * @return string $path
          */
         private function path_default() {
-
+            $backupfolder = substr( md5(get_bloginfo('name')), 0, 10 ) . '-backups';
+            
             if ( empty( $path ) )
-                $path = parent::conform_dir( trailingslashit( WP_CONTENT_DIR ) . substr( $this->key(), 0, 10 ) . '-backups' );
+                $path = parent::conform_dir( trailingslashit( WP_CONTENT_DIR ) . $backupfolder );
 
             $upload_dir = wp_upload_dir();
 
             // If the backups dir can't be created in WP_CONTENT_DIR then fallback to uploads
             if ( ( ( ! is_dir( $path ) && ! is_writable( dirname( $path ) ) ) || ( is_dir( $path ) && ! is_writable( $path ) ) ) && strpos( $path, $upload_dir['basedir'] ) === false )
-                $path = parent::conform_dir( trailingslashit( $upload_dir['basedir'] ) . substr( $this->key(), 0, 10 ) . '-backups' );
+                $path = parent::conform_dir( trailingslashit( $upload_dir['basedir'] ) . $backupfolder );
 
             return $path;
+
         }
 
         /**
@@ -509,56 +515,57 @@ endswitch;
  *
  * @param string $call
  * @return mixed
-         */
-        function _wpcac_backups_api_call( $action ) {
+**/
+        
+function _wpcac_backups_api_call( $action ) {
 
-            switch( $action ) {
+    switch( $action ) {
 
-            case 'supports_backups' :
-                return true;
+    case 'supports_backups' :
+        return true;
 
-            case 'do_backup' :
-                return WPCAC_Backups::get_instance()->do_backup();
+    case 'do_backup' :
+        return WPCAC_Backups::get_instance()->do_backup();
 
-            case 'do_sql_backup' :
-                return WPCAC_Backups::get_instance()->do_sql_backup();
+    case 'do_sql_backup' :
+        return WPCAC_Backups::get_instance()->do_sql_backup();
 
-            case 'get_backup' :
-                return WPCAC_Backups::get_instance()->get_backup();
+    case 'get_backup' :
+        return WPCAC_Backups::get_instance()->get_backup();
 
-            case 'delete_backup' :
-                return WPCAC_Backups::get_instance()->cleanup();
+    case 'delete_backup' :
+        return WPCAC_Backups::get_instance()->cleanup();
 
-            }
+    }
 
-        }
+}
 
-        /**
-         * Return an array of back meta information
-         *
-         * @return array
-         */
-        function _wpcac_get_backups_info() {
+/**
+    * Return an array of back meta information
+    *
+    * @return array
+    */
+function _wpcac_get_backups_info() {
 
-            $hm_backup = new WPCAC_HM_Backup();
+    $hm_backup = new WPCAC_HM_Backup();
 
-            return array(
-                'mysqldump_path' 	=> $hm_backup->get_mysqldump_command_path(),
-                'zip_path' 			=> $hm_backup->get_zip_command_path(),
-                'estimated_size'	=> WPCAC_Backups::get_instance()->get_estimate_size()
-            );
+    return array(
+        'mysqldump_path' 	=> $hm_backup->get_mysqldump_command_path(),
+        'zip_path' 			=> $hm_backup->get_zip_command_path(),
+        'estimated_size'	=> WPCAC_Backups::get_instance()->get_estimate_size()
+    );
 
-        }
+}
 
-        /**
-         * Calculate the filesize of the site
-         *
-         * The calculated size is stored in a transient
-         */
-        function wpcac_ajax_calculate_backup_size() {
+/**
+    * Calculate the filesize of the site
+    *
+    * The calculated size is stored in a transient
+    */
+function wpcac_ajax_calculate_backup_size() {
 
-            WPCAC_Backups::get_instance()->get_filesize();
+    WPCAC_Backups::get_instance()->get_filesize();
 
-            exit;
-        }
-        add_action( 'wp_ajax_nopriv_wpcac_calculate_backup_size', 'wpcac_ajax_calculate_backup_size' );
+    exit;
+}
+add_action( 'wp_ajax_nopriv_wpcac_calculate_backup_size', 'wpcac_ajax_calculate_backup_size' );

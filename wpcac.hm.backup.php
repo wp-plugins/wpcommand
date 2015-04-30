@@ -1809,12 +1809,19 @@ function ListIn($dir, $prefix = '') {
             if (is_dir("$dir/$f")) {
                 $result = array_merge($result, ListIn("$dir/$f", "$prefix$f/"));
             } else {
-                $result[$prefix.$f] = array(
-                    'filename' => $f,
-                    'hash' => md5_file($prefix.$f),
-                    'size' => filesize($prefix.$f),
-                    'lastmod' => date('Y-m-d H:i:s', filemtime($prefix.$f)),
-                );
+                $filesize = filesize($prefix.$f);
+
+                $result[$prefix.$f]['filename'] = $f;
+                $result[$prefix.$f]['size'] = $filesize;
+                $result[$prefix.$f]['lastmod'] = date('Y-m-d H:i:s', filemtime($prefix.$f));
+                if($filesize < 10485760){
+                    // Don't hash files over 10mb
+                    $result[$prefix.$f]['hash'] = md5_file($prefix.$f);
+                    $result[$prefix.$f]['hash_sha1'] = sha1_file($prefix.$f);
+                } else {
+                    $result[$prefix.$f]['hash'] = 0;
+                    $result[$prefix.$f]['hash_sha1'] = 0;
+                };
             }
         }
     }
@@ -1824,7 +1831,6 @@ function ListIn($dir, $prefix = '') {
 }
 
 function _wpcac_get_files(){
-
     $response = ListIn('.');
 
     return $response;

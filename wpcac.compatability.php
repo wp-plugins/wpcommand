@@ -45,7 +45,7 @@ function wpcac_security_admin_notice() {
 
         <div class="error">
 
-            <a class="close-button button" style="float: right; margin-top: 4px; color: inherit; text-decoration: none; " href="<?php echo add_query_arg( 'wpcac_dismiss_plugin_warning', $plugin_path ); ?>">Don't show again</a>
+            <a class="close-button button" style="float: right; margin-top: 4px; color: inherit; text-decoration: none; " href="<?php echo esc_url(add_query_arg( 'wpcac_dismiss_plugin_warning', $plugin_path )); ?>">Don't show again</a>
 
             <p>
 
